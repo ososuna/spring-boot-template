@@ -1,0 +1,17 @@
+version: '3.8' # Specify the Docker Compose file format version
+
+services:
+  db: # Define a service named 'db' for the MySQL database
+    image: mysql:8.0 # Use the official MySQL 8.0 image from Docker Hub
+    restart: always # Ensure the container restarts automatically if it stops
+    environment: # Set environment variables for MySQL configuration
+      MYSQL_ROOT_PASSWORD: 123456 # Set the root password (change for production)
+      MYSQL_DATABASE: template # Define a default database
+      MYSQL_USER: template # Define a new user
+      MYSQL_PASSWORD: 123456 # Set the password for the new user
+    ports:
+      - "3306:3306" # Map host port 3306 to container port 3306 for external access
+    volumes:
+      - db_data:/var/lib/mysql # Persist database data using a named volume
+volumes:
+  db_data:
