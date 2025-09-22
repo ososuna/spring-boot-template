@@ -1,17 +1,35 @@
-version: '3.8' # Specify the Docker Compose file format version
-
 services:
-  db: # Define a service named 'db' for the MySQL database
-    image: mysql:8.0 # Use the official MySQL 8.0 image from Docker Hub
-    restart: always # Ensure the container restarts automatically if it stops
-    environment: # Set environment variables for MySQL configuration
-      MYSQL_ROOT_PASSWORD: 123456 # Set the root password (change for production)
-      MYSQL_DATABASE: template # Define a default database
-      MYSQL_USER: template # Define a new user
-      MYSQL_PASSWORD: 123456 # Set the password for the new user
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "3306:3306" # Map host port 3306 to container port 3306 for external access
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: template
+      MYSQL_USER: template
+      MYSQL_PASSWORD: 123456
+    ports:
+      - "3306:3306"
     volumes:
-      - db_data:/var/lib/mysql # Persist database data using a named volume
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "template", "-p123456"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s
+
 volumes:
   db_data:
