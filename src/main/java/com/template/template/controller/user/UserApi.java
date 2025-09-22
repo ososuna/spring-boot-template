@@ -3,7 +3,7 @@ package com.template.template.controller.user;
 import org.springframework.http.ResponseEntity;
 
 import com.template.template.dto.user.RegisterUserRequestDto;
-import com.template.template.entity.UserEntity;
+import com.template.template.dto.user.RegisterUserResponseDto;
 import com.template.template.exception.BadRequestException;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +18,6 @@ public interface UserApi {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "201", description = "Successful operation")
   })
-  ResponseEntity<UserEntity> register(RegisterUserRequestDto registerUserRequestDto) throws BadRequestException;
+  ResponseEntity<RegisterUserResponseDto> register(RegisterUserRequestDto registerUserRequestDto) throws BadRequestException;
 
 }
