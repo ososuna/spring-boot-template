@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.template.template.dto.user.RegisterUserDto;
+import com.template.template.data.mysql.jpa.UserJpa;
+import com.template.template.data.mysql.model.UserModel;
 import com.template.template.dto.user.RegisterUserRequestDto;
-import com.template.template.entity.UserEntity;
-import com.template.template.repository.user.IUserRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,22 +32,18 @@ public class UserControllerIT {
   private ObjectMapper objectMapper;
 
   @MockitoBean
-  private IUserRepository userRepository;
+  private UserJpa userJpa;
 
   @Test
   public void registerUserWithValidRequest() throws Exception {
     RegisterUserRequestDto request = new RegisterUserRequestDto("pochita@test.com", "123456");
-
-    UserEntity userEntity = UserEntity.builder()
+    UserModel userModel = UserModel.builder()
         .id(1L)
         .email("pochita@test.com")
-        .name(null)
-        .lastName(null)
         .role("USER")
         .password("123456")
         .build();
-
-    when(userRepository.register(any(RegisterUserDto.class))).thenReturn(userEntity);
+    when(userJpa.save(any(UserModel.class))).thenReturn(userModel);
     mockMvc.perform(post("/user")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(request)))
@@ -58,4 +54,36 @@ public class UserControllerIT {
         .andExpect(jsonPath("$.role").value("USER"));
   }
 
+  @Test
+  public void registerUserWithInvalidEmail() throws Exception {
+    RegisterUserRequestDto request = new RegisterUserRequestDto("pochita", "123456");
+    mockMvc.perform(post("/user")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void registerUserWithInvalidPassword() throws Exception {
+    RegisterUserRequestDto request = new RegisterUserRequestDto("pochita@test.com", "123");
+    mockMvc.perform(post("/user")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void registerUserUnexpectedDatabaseError() throws Exception {
+    RegisterUserRequestDto request = new RegisterUserRequestDto("pochita@test.com", "123456");
+
+    when(userJpa.save(any(UserModel.class)))
+        .thenThrow(new DataAccessResourceFailureException("Unexpected database error"));
+
+    mockMvc.perform(post("/user")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.error").value("Database error"))
+        .andExpect(jsonPath("$.message").value("Unexpected database error"));
+  }
 }
