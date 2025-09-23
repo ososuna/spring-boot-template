@@ -12,10 +12,10 @@ import com.template.template.dto.user.RegisterUserResponseDto;
 import com.template.template.exception.BadRequestException;
 import com.template.template.service.user.IUserService;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @RestController
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RequestMapping("/user")
 public class UserController implements UserApi {
 

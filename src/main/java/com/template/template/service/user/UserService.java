@@ -10,10 +10,10 @@ import com.template.template.exception.BadRequestException;
 import com.template.template.mapper.user.UserMapper;
 import com.template.template.repository.user.IUserRepository;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserService implements IUserService {
 
   private final IUserRepository userRepository;

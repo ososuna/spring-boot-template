@@ -8,10 +8,10 @@ import com.template.template.dto.user.RegisterUserDto;
 import com.template.template.entity.UserEntity;
 import com.template.template.mapper.user.UserMapper;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Repository
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserRepository implements IUserRepository {
 
   private final UserJpa userJpa;
